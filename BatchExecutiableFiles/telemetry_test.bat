@@ -1,0 +1,1 @@
+curl -v -X POST -d "{\"temp\": 27}" $THINGSBOARD_HOST/api/v1/$ACCESS_TOKEN/telemetry --header "Content-Type:applica

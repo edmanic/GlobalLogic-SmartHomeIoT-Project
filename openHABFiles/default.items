@@ -1,0 +1,14 @@
+Group    Home                     "GlobalLogic Home"     <house>                                      ["Building"]
+
+Group    F3                       "Third Floor"          <attic>         (Home)                       ["Attic"]
+
+Group    Office                   "Office"               <office>        (Home)                       ["Room"]
+
+Number   Office_Temperature       "Temperature"          <temperature>   (Office, gTemperature)       ["Temperature"]   {channel="mqtt:topic:122ab330:TemperatureChannel"}
+Number   Office_Humidity          "Humidity"             <humidity>      (Office, gHumidity)          ["Humidity"]      {channel="mqtt:topic:122ab330:HumidityChannel"}
+String   Office_Keypad            "KeyPad"               <none>          (Office, gKeypad)                              {channel="mqtt:topic:122ab330:loginChannel"}
+Number   Office_Tremperaturentc   "TremperatureNTC"      <temperature>   (Office, gTremperaturentc)                     {channel="mqtt:topic:122ab330:ntc_tempChannel"}
+
+Group:Number:AVG           gTemperature       "Temperature"       <temperature>   (Home)   ["Temperature"]
+Group:Number:AVG           gHumidity          "Humidity"          <humidity>      (Home)   ["Humidity"]
+

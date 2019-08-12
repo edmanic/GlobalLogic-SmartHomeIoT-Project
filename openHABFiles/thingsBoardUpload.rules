@@ -1,0 +1,40 @@
+//name of the rule
+rule "Cool ThingsBoard Upload"
+when
+    //rule triggered by every state update on the Item
+    Item LessCoolESP8266_RawRoom1 received update
+then 
+    // logging the MQTT message that triggered the rule
+    logInfo("CurrentMessage", LessCoolESP8266_RawRoom1.state.toString)
+    //check if we're connected to the internet
+    if(CheckConnection_Online.state == ON){
+        //executing the two python scripts and waiting for their return values up to 10 seconds
+        executeCommandLine("python3 /usr/local/bin/OnlineDataTransferScript.py \""+LessCoolESP8266_RawRoom1.state.toString+"\"",10000)
+        executeCommandLine("python3@@/usr/local/bin/temperatureAlarmHandlingScript.py",10000)
+    }
+     executeCommandLine("python3@@/usr/local/bin/keypadResetScript.py",10000)
+    executeCommandLine("python3 /usr/local/bin/MQTTRaspberryFeedbackScript.py",10000)
+end
+
+rule "Connection lost"
+when
+    //rule triggered when connection lost
+    Item CheckConnection_Online changed from ON to OFF
+then
+    val curtime = now()
+    //store the current time in the Item
+    curItem.sendCommand(curtime.toString)
+    logInfo("connectionLost", "Device went offline at: " + curtime.toString())
+end
+
+rule "Connection restored"
+when
+    //rule triggered when connection restored
+    Item CheckConnection_Online changed from OFF to ON
+then
+    val offlineTime = curItem.state.toString
+    logInfo("cloudTransfer", "Offline time was: " + offlineTime)
+    //transfer lost data from the moment we lost the connection
+    executeCommandLine("python3 /usr/local/bin/OfflineDataTransferScript.py " + offlineTime,10000)
+    logInfo("cloudTransfer", "Restoration completed!")
+end

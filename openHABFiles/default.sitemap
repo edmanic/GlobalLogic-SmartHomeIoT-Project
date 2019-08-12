@@ -1,0 +1,23 @@
+sitemap globallogic_office label="GlobalLogic home" {
+    Frame {
+        Group item=Office
+    }
+
+    Frame {
+        Text label="Temperature" icon="temperature" {
+            Default item=Office_Temperature label="Office"
+        }
+
+        Text label="Humidity" icon="humidity" {
+            Default item=Office_Humidity label="Office"
+        }
+
+        Text label="KeyPad" {
+            Default item=Office_Keypad label="Office"
+        }
+
+        Text label="TremperatureNTC" icon="temperature"{
+            Default item=Office_Tremperaturentc label="Office"
+        }
+    }
+}

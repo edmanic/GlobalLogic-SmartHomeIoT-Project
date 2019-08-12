@@ -1,0 +1,1 @@
+curl -X POST --header "Content-Type: application/json" --header "Accept: application/json" -d "{\"username\":\"$YOUR_USERNAME\", \"password\":\"$YOUR_PASSWORD\"}" "http://$THINGSBOARD_HOST/api/auth/login"
