@@ -1,0 +1,1 @@
+curl -v -X POST -d "{\"alarm state\": \"active\"}" http://$THINGSBOARD_HOST/api/v1/$ACCESS_TOKEN/attributes --header "Content-Type:application/json"
