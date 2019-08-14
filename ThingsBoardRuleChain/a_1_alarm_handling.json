@@ -1,0 +1,235 @@
+{
+  "ruleChain": {
+    "additionalInfo": null,
+    "name": "A-1 Alarm Handling",
+    "firstRuleNodeId": null,
+    "root": false,
+    "debugMode": false,
+    "configuration": null
+  },
+  "metadata": {
+    "firstNodeIndex": null,
+    "nodes": [
+      {
+        "additionalInfo": {
+          "layoutX": 168,
+          "layoutY": 307
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetTelemetryNode",
+        "name": "All Telemtries From Last Minute",
+        "debugMode": true,
+        "configuration": {
+          "startInterval": 1,
+          "endInterval": 1,
+          "startIntervalPattern": "",
+          "endIntervalPattern": "",
+          "useMetadataIntervalPatterns": false,
+          "startIntervalTimeUnit": "MINUTES",
+          "endIntervalTimeUnit": "MILLISECONDS",
+          "fetchMode": "ALL",
+          "orderBy": "DESC",
+          "latestTsKeyNames": [
+            "temp"
+          ]
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 7,
+          "layoutY": 513
+        },
+        "type": "org.thingsboard.rule.engine.debug.TbMsgGeneratorNode",
+        "name": "Pinger",
+        "debugMode": false,
+        "configuration": {
+          "msgCount": 0,
+          "periodInSeconds": 5,
+          "originatorId": "579f0a60-8c4a-11e9-bd2b-cf2bf72731a6",
+          "originatorType": "DEVICE",
+          "jsScript": "var msg = { pong: \"ping\" };\nvar msgType = \"POST_ATTRIBUTES_REQUEST\";\n\nreturn { msg: msg, metadata: metadata, msgType: msgType };"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 309,
+          "layoutY": 491
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Check Telemtry List Size",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "if(JSON.stringify(metadata) === JSON.stringify({})){\n    return false;\n}\nelse{\n    if(JSON.parse(metadata.temp).length>=3){\n        return true;\n    }\n    else{\n        return false;\n    }\n}"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 440,
+          "layoutY": 304
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Temp Check",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var counter = 0;\nfor (var i = 0; i < 3; i++) {\n    if(JSON.parse(metadata.temp)[i].value<=15 ||\n    JSON.parse(metadata.temp)[i].value>=40){\n        counter++;\n    }\n}\nif(counter==3){\n    return true;\n}\nelse{\n    return false;\n}"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 1125,
+          "layoutY": 616
+        },
+        "type": "org.thingsboard.rule.engine.action.TbCreateAlarmNode",
+        "name": "A-1 Alarm Activation",
+        "debugMode": true,
+        "configuration": {
+          "alarmType": "A-1 temp alarm",
+          "alarmDetailsBuildJs": "var details = {warning: \"active1\"};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;",
+          "severity": "CRITICAL",
+          "propagate": false,
+          "useMessageAlarmData": false
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 1113,
+          "layoutY": 475
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Log Pending Alarm State A-1",
+        "debugMode": true,
+        "configuration": {
+          "jsScript": "var msg = { alarmState: \"pending\" };\nvar msgType = \"POST_ATTRIBUTES_REQUEST\";\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 686,
+          "layoutY": 162
+        },
+        "type": "org.thingsboard.rule.engine.action.TbClearAlarmNode",
+        "name": "A-1 Alarm Deactivation",
+        "debugMode": false,
+        "configuration": {
+          "alarmType": "A-1 temp alarm",
+          "alarmDetailsBuildJs": "var details = {warning: \"unactive1\"};\nif (metadata.prevAlarmDetails) {\n    details = JSON.parse(metadata.prevAlarmDetails);\n}\nreturn details;"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 1045,
+          "layoutY": 165
+        },
+        "type": "org.thingsboard.rule.engine.transform.TbTransformMsgNode",
+        "name": "Log Clear Alarm Status A-1",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "var msg = { alarmState: \"clear\" };\nvar msgType = \"POST_ATTRIBUTES_REQUEST\";\n\nreturn {msg: msg, metadata: metadata, msgType: msgType};"
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 613,
+          "layoutY": 442
+        },
+        "type": "org.thingsboard.rule.engine.metadata.TbGetAttributesNode",
+        "name": "Retrieve Alarm State",
+        "debugMode": false,
+        "configuration": {
+          "clientAttributeNames": [
+            "alarmState"
+          ],
+          "sharedAttributeNames": [],
+          "serverAttributeNames": [],
+          "latestTsKeyNames": []
+        }
+      },
+      {
+        "additionalInfo": {
+          "layoutX": 773,
+          "layoutY": 578
+        },
+        "type": "org.thingsboard.rule.engine.filter.TbJsFilterNode",
+        "name": "Check Alarm State",
+        "debugMode": false,
+        "configuration": {
+          "jsScript": "return metadata.cs_alarmState==\"active\";"
+        }
+      }
+    ],
+    "connections": [
+      {
+        "fromIndex": 0,
+        "toIndex": 2,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 1,
+        "toIndex": 0,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 2,
+        "toIndex": 3,
+        "type": "True"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 6,
+        "type": "False"
+      },
+      {
+        "fromIndex": 3,
+        "toIndex": 8,
+        "type": "True"
+      },
+      {
+        "fromIndex": 6,
+        "toIndex": 7,
+        "type": "Cleared"
+      },
+      {
+        "fromIndex": 8,
+        "toIndex": 9,
+        "type": "Success"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 5,
+        "type": "False"
+      },
+      {
+        "fromIndex": 9,
+        "toIndex": 4,
+        "type": "True"
+      }
+    ],
+    "ruleChainConnections": [
+      {
+        "fromIndex": 5,
+        "targetRuleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "602dbee0-56b9-11e9-b46e-d77b281c425a"
+        },
+        "additionalInfo": {
+          "layoutX": 1213,
+          "layoutY": 329,
+          "ruleChainNodeId": "rule-chain-node-12"
+        },
+        "type": "Success"
+      },
+      {
+        "fromIndex": 7,
+        "targetRuleChainId": {
+          "entityType": "RULE_CHAIN",
+          "id": "602dbee0-56b9-11e9-b46e-d77b281c425a"
+        },
+        "additionalInfo": {
+          "layoutX": 1213,
+          "layoutY": 329,
+          "ruleChainNodeId": "rule-chain-node-12"
+        },
+        "type": "Success"
+      }
+    ]
+  }
+}
