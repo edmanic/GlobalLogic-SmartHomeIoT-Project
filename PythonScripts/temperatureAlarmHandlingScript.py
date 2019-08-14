@@ -51,37 +51,37 @@ def main():
     print("beginning alarm handling...")
     # parts of the request URL witch we will combine back together for further use
     url1 = '$THINGSBOARD_HOST/api/v1/'
-    url2 = '/attributes?clientKeys=\"alarm state\"'
+    url2 = '/attributes?clientKeys=alarmState'
     url3 = '/attributes'
     # headers for successful get or post cURL request
     headers1 = {'Accept': 'application/json', 'Accept-Charset': 'UTF-8',
                 'X-Authorization': 'Bearer $YOUR_AUTH_TOKEN'}
     headers2 = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8'}
-    # URLs for fetching alarm status (11,22) and updating alarm status (33,44)
+    # URLs for fetching alarm state (11,22) and updating alarm state (33,44)
     url11 = url1 + LIST_OF_TEMP_TOKENS[0] + url2
     url22 = url1 + LIST_OF_TEMP_TOKENS[1] + url2
     url33 = url1 + LIST_OF_TEMP_TOKENS[0] + url3
     url44 = url1 + LIST_OF_TEMP_TOKENS[1] + url3
-    # current alarm status from temp (r) and temp_ntc (p)
+    # current alarm state from temp (r) and temp_ntc (p)
     r = getRequest(url11, headers1)
     p = getRequest(url22, headers1)
     # check weather both thermostats have reported temperature anomaly and go into "emergency mode"
-    if json.loads(r.content)["client"]["alarm"] == "pending" and json.loads(p.content)["client"]["alarm"] == "pending":
-        print("Setting the alarm status to \"active\"")
-        data = "{alarm: active}"
+    if json.loads(r.content)["client"]["alarmState"] == "pending" and json.loads(p.content)["client"]["alarmState"] == "pending":
+        print("Setting the alarm state to \"active\"")
+        data = "{alarmState: active}"
         postRequest(url33, headers2, data)
         postRequest(url44, headers2, data)
         # activate counter-measures through the MQTT protocol
         mqttEmergency("1")
     # check if we're already in emergency mode and do nothing
-    elif json.loads(r.content)["client"]["alarm"] == "active" and json.loads(p.content)["client"]["alarm"] == "active":
-        print("Leaving the alarm status to \"active\"")
+    elif json.loads(r.content)["client"]["alarmState"] == "active" and json.loads(p.content)["client"]["alarmState"] == "active":
+        print("Leaving the alarm state to \"active\"")
     # any other situation is presented as "normal mode" and counter-measuers are deactivated through MQTT or just
     # remain deactivated
     else:
-        print("leaving the alarm status as is")
+        print("leaving the alarm state as is")
         mqttEmergency("0")
-    # get end alarm status
+    # get end alarm state
     getRequest(url11, headers1)
     getRequest(url22, headers1)
     print("done!")
